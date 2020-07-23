@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Despair</title>
+    <style>
+        body {
+            margin: 0;
+            background: url(https://cdn.discordapp.com/attachments/697674219223253003/734119484343976036/unknown.png) no-repeat 50% fixed;
+            background-size: cover;
+        }
+
+        .counter-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            position: absolute;
+            justify-content: center;
+        }
+
+        .counters {
+            margin: auto;
+            text-align: center;
+        }
+
+        .counters span {
+            font-family: Arial, sans-serif;
+            font-size: 36pt;
+            color: #fff;
+            text-shadow: 2px 2px 9px black;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+<div class="counter-container">
+    <div class="counters">
+        <span>Despair count:</span>
+        <span id="despairCounter"></span>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/socket.io-client@2/dist/socket.io.js"></script>
+<script type="module">
+  import { CountUp } from './countup.min.js';
+
+  const countupAnimation = new CountUp('despairCounter', {{ despairAmount }});
+  countupAnimation.start();
+  const socket = io.connect('{{ websocketServer }}');
+  socket.on('despair', (data) => {
+    countupAnimation.update(data);
+  })
+</script>
+<script src="/reload/reload.js"></script>
+</body>
+<!-- https://cdn.discordapp.com/attachments/697674219223253003/734123750542409748/unknown.png -->
+</html>

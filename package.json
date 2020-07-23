@@ -1,0 +1,33 @@
+{
+  "name": "despair-server",
+  "version": "1.0.0",
+  "main": "index.js",
+  "description": "Just serving static page.",
+  "repository": "git@github.com:IAmVisco/despair-server.git",
+  "scripts": {
+    "start": "nodemon -e njk,js,css index.js",
+    "precommit": "lint-staged"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.17.1",
+    "ioredis": "^4.17.3",
+    "nunjucks": "^3.2.2",
+    "reload": "^3.1.0",
+    "socket.io": "^2.3.0"
+  },
+  "devDependencies": {
+    "eslint": "^7.4.0",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-plugin-import": "^2.22.0",
+    "husky": "^4.2.5",
+    "lint-staged": "^10.2.11",
+    "nodemon": "^2.0.4"
+  },
+  "lint-staged": {
+    "*.{js,ts}": [
+      "eslint --fix",
+      "git add"
+    ]
+  }
+}
