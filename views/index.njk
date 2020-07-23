@@ -23,12 +23,15 @@
             text-align: center;
         }
 
-        .counters span {
+        a, span {
             font-family: Arial, sans-serif;
-            font-size: 36pt;
-            color: #fff;
-            text-shadow: 2px 2px 9px black;
             display: block;
+            text-shadow: 2px 2px 9px black;
+        }
+
+        .counters span {
+            color: #fff;
+            font-size: 36pt;
         }
     </style>
 </head>
@@ -37,6 +40,11 @@
     <div class="counters">
         <span>Despair count:</span>
         <span id="despairCounter"></span>
+        <small>
+            <a href="https://discord.com/api/oauth2/authorize?client_id=735979275181621298&permissions=0&scope=bot">
+                Invite bot that counts it
+            </a>
+        </small>
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/socket.io-client@2/dist/socket.io.js"></script>
@@ -48,7 +56,7 @@
   const socket = io.connect('{{ websocketServer }}');
   socket.on('despair', (data) => {
     countupAnimation.update(data);
-  })
+  });
 </script>
 {#<script src="/reload/reload.js"></script>#}
 </body>
