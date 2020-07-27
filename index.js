@@ -11,7 +11,6 @@ const redis = new Redis();
 const redisSub = new Redis();
 const port = process.env.PORT || 2434;
 const websocketServer = process.env.WS_SERVER || `http://localhost:${port}`;
-const REDIS_KEY = 'despair';
 
 app.use(express.static(path.join(__dirname, 'public')));
 nunjucks.configure(path.join(__dirname, 'views'), {
@@ -22,24 +21,31 @@ nunjucks.configure(path.join(__dirname, 'views'), {
 app.get('/', async (req, res) => {
   try {
     redis.incr('despair-visits');
-    const despairAmount = await redis.get(REDIS_KEY);
-    res.render('index.njk', { despairAmount, websocketServer });
+    const despairAmount = await redis.get('despair');
+    res.render('index.njk', {
+      despairAmount,
+      websocketServer,
+    });
   } catch (e) {
     console.error('Something went wrong', e);
   }
 });
 
-const server = http.createServer(app);
-const io = socketIo(server);
-redisSub.psubscribe('__keyspace@0__:*');
-redisSub.on('pmessage', async () => {
+const broadcastData = async (socket) => {
   try {
-    const despairAmount = await redis.get(REDIS_KEY);
-    io.emit('despair', despairAmount);
+    const allCounters = await redis.mget('ayame', 'pray', 'phone', 'poyoyo', 'nakirium', 'despair');
+    socket.emit('all-data', allCounters);
   } catch (e) {
     console.error('Failed to send websocket event.', e);
   }
-});
+};
+
+const server = http.createServer(app);
+const io = socketIo(server);
+io.on('connect', (socket) => { broadcastData(socket); });
+
+redisSub.psubscribe('__keyspace@0__:*');
+redisSub.on('pmessage', () => { broadcastData(io); });
 
 reload(app).then(() => {
   server.listen(port, () => {

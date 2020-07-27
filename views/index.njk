@@ -4,61 +4,133 @@
     <meta charset="UTF-8">
     <title>Despair</title>
     <style>
-        body {
-            margin: 0;
-            background: url(https://cdn.discordapp.com/attachments/697674219223253003/734119484343976036/unknown.png) no-repeat 50% fixed;
-            background-size: cover;
-        }
+      body {
+        margin: 0;
+        background: url(https://cdn.discordapp.com/attachments/697674219223253003/734119484343976036/unknown.png) no-repeat 50% fixed;
+        background-size: cover;
+        color: #fff;
+        text-shadow: 2px 2px 9px black;
+        font-family: Arial, sans-serif;
+      }
 
-        .counter-container {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            position: absolute;
-            justify-content: center;
-        }
+      .counter-container {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        position: absolute;
+        justify-content: center;
+      }
 
-        .counters {
-            margin: auto;
-            text-align: center;
-        }
+      .counters {
+        margin: auto;
+        text-align: center;
+      }
 
-        a, span {
-            font-family: Arial, sans-serif;
-            display: block;
-            text-shadow: 2px 2px 9px black;
-        }
+      /*a, span {*/
+      /*  display: block;*/
+      /*}*/
 
-        .counters span {
-            color: #fff;
-            font-size: 36pt;
+      .main-counter {
+        font-size: 36pt;
+        display: block;
+      }
+
+      .small-counter {
+        font-size: 18pt;
+      }
+
+      .blinker {
+        font-size: 22pt;
+        animation: blink-animation 5s infinite ease-in-out;
+        display: none;
+      }
+
+      .counters small {
+        display: inline-block;
+      }
+
+      @keyframes blink-animation {
+        0% {
+          opacity: 0;
         }
+        40% {
+          opacity: 1;
+        }
+        80% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+        }
+      }
     </style>
 </head>
 <body>
 <div class="counter-container">
     <div class="counters">
-        <span>Despair count:</span>
-        <span id="despairCounter"></span>
+        <span class="main-counter">Despair counter <sup class="blinker">LIVE</sup></span>
+        <span id="despairCounter" class="main-counter"></span>
+        <details style="display: none"> {# Needs some work still #}
+            <summary>More counters</summary>
+            <div class="small-counter">
+                <span>Ayame: </span>
+                <span id="ayameCounter"></span>
+            </div>
+            <div class="small-counter">
+                <span>Pray: </span>
+                <span id="prayCounter"></span>
+            </div>
+            <div class="small-counter">
+                <span>Phone: </span>
+                <span id="phoneCounter"></span>
+            </div>
+            <div class="small-counter">
+                <span>Poyoyo: </span>
+                <span id="poyoyoCounter"></span>
+            </div>
+            <div class="small-counter">
+                <span>Nakirium: </span>
+                <span id="nakiriumCounter"></span>
+            </div>
+        </details>
         <small>
             <a href="https://discord.com/api/oauth2/authorize?client_id=735979275181621298&permissions=0&scope=bot">
                 Invite bot that counts it
             </a>
-        </small>
+        </small> • <small><a href="https://github.com/IAmVisco/despair-server">GitHub</a></small>
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/socket.io-client@2/dist/socket.io.js"></script>
 <script type="module">
   import { CountUp } from './countup.min.js';
 
-  const countupAnimation = new CountUp('despairCounter', {{ despairAmount }});
-  countupAnimation.start();
+  const despairCountup = new CountUp('despairCounter', {{ despairAmount }});
+  const ayameCounter = new CountUp('ayameCounter', 0);
+  const prayCounter = new CountUp('prayCounter', 0);
+  const phoneCounter = new CountUp('phoneCounter', 0);
+  const poyoyoCounter = new CountUp('poyoyoCounter', 0);
+  const nakiriumCounter = new CountUp('nakiriumCounter', 0);
+  despairCountup.start();
   const socket = io.connect('{{ websocketServer }}');
+  socket.on('connect', () => {
+    document.querySelector('.blinker').style.display = 'inline';
+  });
+  socket.on('disconnect', () => {
+    document.querySelector('.blinker').style.display = 'none';
+  });
   socket.on('despair', (data) => {
-    countupAnimation.update(data);
+    despairCountup.update(data);
+  });
+  socket.on('all-data', ([ayame, pray, phone, poyoyo, nakirium, despair]) => {
+    ayameCounter.update(ayame);
+    prayCounter.update(pray);
+    phoneCounter.update(phone);
+    poyoyoCounter.update(poyoyo);
+    nakiriumCounter.update(nakirium)
+    despairCountup.update(despair);
   });
 </script>
-{#<script src="/reload/reload.js"></script>#}
+<script src="/reload/reload.js"></script>
 </body>
 <!-- https://cdn.discordapp.com/attachments/697674219223253003/734123750542409748/unknown.png -->
 </html>
