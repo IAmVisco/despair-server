@@ -34,7 +34,9 @@ app.get('/', async (req, res) => {
 const broadcastData = async (socket) => {
   try {
     const allCounters = await redis.mget('ayame', 'pray', 'phone', 'poyoyo', 'nakirium', 'despair');
+    const despairRates = await redis.lrange('despairRate', 0, 60);
     socket.emit('all-data', allCounters);
+    socket.emit('despair-rate', despairRates);
   } catch (e) {
     console.error('Failed to send websocket event.', e);
   }
@@ -46,6 +48,14 @@ io.on('connect', (socket) => { broadcastData(socket); });
 
 redisSub.psubscribe('__keyspace@0__:*');
 redisSub.on('pmessage', () => { broadcastData(io); });
+
+let lastDespair = 0;
+setInterval(async () => {
+  const currentDespair = await redis.get('despair');
+  const secondRate = currentDespair - lastDespair;
+  lastDespair = currentDespair;
+  await redis.lpush('despairRate', secondRate);
+}, 1000);
 
 reload(app).then(() => {
   server.listen(port, () => {

@@ -26,10 +26,6 @@
         text-align: center;
       }
 
-      /*a, span {*/
-      /*  display: block;*/
-      /*}*/
-
       .main-counter {
         font-size: 36pt;
         display: block;
@@ -70,6 +66,10 @@
     <div class="counters">
         <span class="main-counter">Despair counter <sup class="blinker">LIVE</sup></span>
         <span id="despairCounter" class="main-counter"></span>
+        <span id="secondRate" class="small-counter"></span>/s
+        •
+        <span id="minuteRate" class="small-counter"></span>/min
+        <br>
         <details style="display: none"> {# Needs some work still #}
             <summary>More counters</summary>
             <div class="small-counter">
@@ -118,9 +118,6 @@
   socket.on('disconnect', () => {
     document.querySelector('.blinker').style.display = 'none';
   });
-  socket.on('despair', (data) => {
-    despairCountup.update(data);
-  });
   socket.on('all-data', ([ayame, pray, phone, poyoyo, nakirium, despair]) => {
     ayameCounter.update(ayame);
     prayCounter.update(pray);
@@ -130,6 +127,11 @@
     despairCountup.update(despair);
     document.title = `Despair count: ${despair}`;
   });
+  socket.on('despair-rate', (despairRates) => {
+    const minuteRate = despairRates.reduce((acc, cur) => acc + +cur, 0) / despairRates.length;
+    document.querySelector('#secondRate').innerHTML = despairRates[0];
+    document.querySelector('#minuteRate').innerHTML = minuteRate.toFixed(2);
+  })
 </script>
 {#<script src="/reload/reload.js"></script>#}
 </body>
