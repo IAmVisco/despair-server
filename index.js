@@ -4,7 +4,7 @@ const express = require('express');
 const nunjucks = require('nunjucks');
 const Redis = require('ioredis');
 const reload = require('reload');
-const socketIo = require('socket.io');
+const { Server } = require('socket.io');
 
 const app = express();
 const redis = new Redis();
@@ -43,7 +43,7 @@ const broadcastData = async (socket) => {
 };
 
 const server = http.createServer(app);
-const io = socketIo(server);
+const io = new Server(server);
 io.on('connect', (socket) => { broadcastData(socket); });
 
 redisSub.psubscribe('__keyspace@0__:*');
@@ -52,9 +52,10 @@ redisSub.on('pmessage', () => { broadcastData(io); });
 let lastDespair = 0;
 setInterval(async () => {
   const currentDespair = await redis.get('despair');
-  const secondRate = currentDespair - lastDespair;
+  const despairRate = currentDespair - lastDespair;
   lastDespair = currentDespair;
-  await redis.lpush('despairRate', secondRate);
+  await redis.lpush('despairRate', despairRate);
+  await redis.ltrim('despairRate', 0, 60);
 }, 1000);
 
 reload(app).then(() => {
